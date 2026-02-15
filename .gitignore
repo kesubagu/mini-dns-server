@@ -1,0 +1,12 @@
+# Rust build artifacts
+/target/
+
+# Cargo local config and lockfile backups
+**/*.rs.bk
+
+# macOS
+.DS_Store
+
+# IDE/editor files
+.idea/
+.vscode/

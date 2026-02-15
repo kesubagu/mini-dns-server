@@ -1,0 +1,11 @@
+[package]
+name = "MiniDNSServer"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+dashmap = "6.1.0"
+tokio = { version = "1", features = ["full"] }
+hickory-proto = "0.24.0"
