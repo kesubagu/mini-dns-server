@@ -1,6 +1,6 @@
 use axum::extract::State;
 use axum::http::StatusCode;
-use axum::routing::{get, post};
+use axum::routing::{delete, get, post};
 use axum::{Json, Router};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -12,6 +12,7 @@ pub fn router(state: Arc<AppState>) -> Router {
     Router::new()
         .route("/blocklist", get(get_blocklist))
         .route("/blocklist", post(put_blocklist))
+        .route("/blocklist", delete(delete_blocklist))
         .with_state(state)
 }
 
@@ -46,6 +47,24 @@ async fn put_blocklist(
     if let Err(err) = save_blocked_domains(BLOCKLIST_PATH, &snapshot) {
         eprintln!("failed to save blocklist: {err}");
         return StatusCode::INTERNAL_SERVER_ERROR;
+    }
+
+    StatusCode::ACCEPTED
+}
+
+async fn delete_blocklist(
+    State(state): State<Arc<AppState>>,
+    Json(request): Json<BlocklistRequest>,
+) -> StatusCode {
+    let normalized = normalize_domain(&request.domain_name);
+    let snapshot = {
+        let mut writer = state.block_list.write().await;
+        writer.remove(&normalized);
+        writer.clone()
+    };
+
+    if let Err(err) = save_blocked_domains(BLOCKLIST_PATH, &snapshot) {
+        eprintln!("failed to save blocklist {err}");
     }
 
     StatusCode::ACCEPTED
